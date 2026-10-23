@@ -96,11 +96,25 @@ async def chat(request: Request):
             params={'id':'eq.'+str(usage_id)},json={
              'model':'gpt-4.1-mini','estimated_cost_usd':min(0.10,max(0.000001,estimate)),
              'input_tokens':input_tokens,'output_tokens':output_tokens})
-        await client.post(api+'messages',headers=headers,json=[
-            {'owner_id':owner,'conversation_id':conversation_id,'role':'user','content':prompt},
-            {'owner_id':owner,'conversation_id':conversation_id,'role':'assistant','content':answer}
-        ])
-        return {'answer':answer,'conversation_id':conversation_id,'input_tokens':input_tokens,'output_tokens':output_tokens}
+        storage_warning = None
+        for role, content in [('user', prompt), ('assistant', answer)]:
+            try:
+                saved = await client.post(
+                    api + 'messages', headers=headers,
+                    json={'owner_id':owner,'conversation_id':conversation_id,
+                          'role':role,'content':content}
+                )
+                if saved.status_code not in (200,201,204):
+                    try:
+                        err_code = saved.json().get('code', 'unknown')
+                    except Exception:
+                        err_code = 'unknown'
+                    storage_warning = 'Conversation history could not be saved (HTTP ' + str(saved.status_code) + ', code ' + str(err_code)[:24] + ').'
+            except Exception:
+                storage_warning = 'Conversation history could not be saved (network error).'
+        return {'answer':answer,'conversation_id':conversation_id,
+                'input_tokens':input_tokens,'output_tokens':output_tokens,
+                'warning':storage_warning}
 
 @app.get('/{path:path}')
 async def frontend(path: str, request: Request):
