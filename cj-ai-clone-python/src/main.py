@@ -80,7 +80,12 @@ async def chat(request: Request):
             json={'model':'gpt-4.1-mini','messages':messages,'max_completion_tokens':900},
             timeout=60)
         if answer_r.status_code != 200:
-            raise HTTPException(502,'OpenAI request failed. Check provider billing and deployment secrets.')
+            provider_code = 'unknown'
+            try:
+                provider_code = str(answer_r.json().get('error', {}).get('code') or answer_r.json().get('error', {}).get('type') or 'unknown')[:60]
+            except Exception:
+                pass
+            raise HTTPException(502, 'OpenAI failed: HTTP ' + str(answer_r.status_code) + ', code ' + provider_code)
         result = answer_r.json()
         answer = result['choices'][0]['message']['content'] or ''
         usage = result.get('usage',{})
