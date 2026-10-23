@@ -2,6 +2,6 @@
 name = "cj-ai-clone"
 version = "0.1.0"
 requires-python = ">=3.13"
-dependencies = ["fastapi"]
+dependencies = ["fastapi", "httpx"]
 [dependency-groups]
 dev = ["workers-py", "workers-runtime-sdk"]
