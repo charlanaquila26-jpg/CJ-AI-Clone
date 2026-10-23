@@ -29,7 +29,7 @@ async function restoreChat(){
 function formatCJText(el,content){
  el.replaceChildren();
  const lines=String(content||'').replace(/\r/g,'').split('\n');let paragraph=[],bullet=null;
- const addInline=(parent,txt)=>{const pieces=txt.split(/(\\*\\*[^*]+\\*\\*)/g);for(const piece of pieces){if(piece.startsWith('**')&&piece.endsWith('**')){const strong=document.createElement('strong');strong.textContent=piece.slice(2,-2);parent.appendChild(strong)}else parent.appendChild(document.createTextNode(piece))}};
+ const addInline=(parent,txt)=>{const pieces=txt.split(/(\*\*[^*]+\*\*)/g);for(const piece of pieces){if(piece.startsWith('**')&&piece.endsWith('**')){const strong=document.createElement('strong');strong.textContent=piece.slice(2,-2);parent.appendChild(strong)}else parent.appendChild(document.createTextNode(piece))}};
  const flush=()=>{if(paragraph.length){const p=document.createElement('p');addInline(p,paragraph.join(' '));el.appendChild(p);paragraph=[]}bullet=null};
  for(const raw of lines){const line=raw.trim();if(!line){flush();continue}
   if(/^#{1,3} /.test(line)){flush();const h=document.createElement('h3');h.textContent=line.replace(/^#{1,3} /,'');el.appendChild(h);continue}
