@@ -62,7 +62,7 @@ async def chat(request: Request):
                 headers={**headers, 'Prefer':'return=representation'},
                 json={'owner_id':owner,'title':prompt[:65]})
             if cr.status_code not in (200,201):
-                raise HTTPException(500,'Unable to create conversation.')
+                raise HTTPException(500, 'Conversation create failed: HTTP ' + str(cr.status_code) + ', code ' + str((cr.json().get('code', 'unknown') if cr.headers.get('content-type','').startswith('application/json') else 'non-json'))[:40])
             conversation_id = cr.json()[0]['id']
         history_r = await client.get(api+'messages',headers=headers,params={
             'conversation_id':'eq.'+str(conversation_id),'order':'created_at.desc',
