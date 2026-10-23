@@ -1,11 +1,13 @@
 # CJ AI Clone — Cloudflare Python Worker
 
-Python FastAPI app running on Cloudflare Workers. Light-themed browser dashboard with Supabase login and persistent tasks, memory, approval readout, activities, and usage readout.
+Python FastAPI app hosted on Cloudflare Workers, with Supabase authentication and a private dashboard.
 
-## Deploy
-1. Set up Python 3.13+, uv, Node. `uv run pywrangler deploy` (see Cloudflare Python Workers docs).
-2. Add `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` as Worker environment variables. These are public keys, not service-role secrets.
-3. Configure Supabase Auth email/password for your personal login, restrict signups, verify all nine RLS tables from prior database migration. Set Site URL and permitted redirect URLs.
-4. AI chat stays disabled until authenticated OpenAI backend and cost tracking are implemented; do not expose a raw OpenAI key in the browser.
+## Security
 
-The app does NOT yet perform autonomous work or actions. Approval queue is read-only and requires a separate action policy/executor. Don't connect sensitive records until isolation and protections are tested.
+Add `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` as runtime bindings. Add `OPENAI_API_KEY` only as an encrypted Cloudflare **Secret**, never as a plaintext variable. Rotate a key that was mistakenly added as plaintext.
+
+AI chat and autonomous actions remain disabled in the current backend. Do not consider the OpenAI integration complete until the backend implements session verification, budget enforcement, persisted conversations, and approval gating.
+
+## Deployment
+
+Run `uvx --from workers-py pywrangler deploy` from the `cj-ai-clone-python` directory.
