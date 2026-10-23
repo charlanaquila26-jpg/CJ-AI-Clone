@@ -94,11 +94,11 @@ async def chat(request: Request):
         estimate = (input_tokens*0.40+output_tokens*1.60)/1000000
         storage_warning = None
         try:
-            usage_response = await client.patch(api+'usage_events',headers=headers,
-                params={'id':'eq.'+str(usage_id)},json={
-                 'model':'gpt-4.1-mini','estimated_cost_usd':min(0.10,max(0.000001,estimate)),
-                 'input_tokens':input_tokens,'output_tokens':output_tokens})
-            if usage_response.status_code not in (200,204):
+            usage_response = await client.post(
+                api + 'rpc/finalize_ai_chat_usage', headers=headers,
+                json={'p_event':usage_id,'p_input_tokens':input_tokens,
+                      'p_output_tokens':output_tokens,'p_cost':min(0.10,max(0.000001,estimate))})
+            if usage_response.status_code != 200 or usage_response.json() is not True:
                 storage_warning = 'Usage accounting reconciliation failed; the conservative $0.10 reservation remains.'
         except Exception:
             storage_warning = 'Usage accounting reconciliation was interrupted; the conservative $0.10 reservation remains.'
