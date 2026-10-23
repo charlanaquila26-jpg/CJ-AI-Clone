@@ -1,0 +1,8 @@
+{
+  "name": "cj-ai-clone",
+  "main": "src/main.py",
+  "compatibility_date": "2026-10-23",
+  "compatibility_flags": ["python_workers"],
+  "workers_dev": true,
+  "assets": {"directory": "./public", "binding": "ASSETS", "run_worker_first": true}
+}
