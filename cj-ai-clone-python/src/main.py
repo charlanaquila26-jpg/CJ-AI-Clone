@@ -92,11 +92,16 @@ async def chat(request: Request):
         input_tokens = int(usage.get('prompt_tokens',0))
         output_tokens = int(usage.get('completion_tokens',0))
         estimate = (input_tokens*0.40+output_tokens*1.60)/1000000
-        await client.patch(api+'usage_events',headers=headers,
-            params={'id':'eq.'+str(usage_id)},json={
-             'model':'gpt-4.1-mini','estimated_cost_usd':min(0.10,max(0.000001,estimate)),
-             'input_tokens':input_tokens,'output_tokens':output_tokens})
         storage_warning = None
+        try:
+            usage_response = await client.patch(api+'usage_events',headers=headers,
+                params={'id':'eq.'+str(usage_id)},json={
+                 'model':'gpt-4.1-mini','estimated_cost_usd':min(0.10,max(0.000001,estimate)),
+                 'input_tokens':input_tokens,'output_tokens':output_tokens})
+            if usage_response.status_code not in (200,204):
+                storage_warning = 'Usage accounting reconciliation failed; the conservative $0.10 reservation remains.'
+        except Exception:
+            storage_warning = 'Usage accounting reconciliation was interrupted; the conservative $0.10 reservation remains.'
         for role, content in [('user', prompt), ('assistant', answer)]:
             try:
                 saved = await client.post(
